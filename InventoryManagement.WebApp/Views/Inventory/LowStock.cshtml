@@ -1,0 +1,73 @@
+﻿@model IEnumerable<InventoryManagement.WebApp.Models.Inventory.InventoryItemViewModel>
+
+@{
+    ViewData["Title"] = "Low Stock Items";
+}
+
+<h1>Low Stock Items</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="mb-3">
+    <a asp-action="Index" class="btn btn-secondary">Back to Inventory</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-success">
+        <p class="mb-0">No low stock items found. Inventory levels are sufficient.</p>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        <h5>Attention Required</h5>
+        <p class="mb-0">The following items are below their reorder threshold and need attention.</p>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Warehouse</th>
+                <th>Location</th>
+                <th>Quantity</th>
+                <th>Reorder Threshold</th>
+                <th>Target Level</th>
+                <th>Deficit</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.ProductName</td>
+                    <td>@item.ProductSku</td>
+                    <td>@item.WarehouseName</td>
+                    <td>@item.LocationCode</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.ReorderThreshold</td>
+                    <td>@item.TargetStockLevel</td>
+                    <td>@(item.TargetStockLevel - item.Quantity)</td>
+                    <td>
+                        <a asp-action="Adjust" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Adjust</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

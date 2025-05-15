@@ -1,0 +1,109 @@
+﻿@model InventoryManagement.WebApp.Models.Inventory.WarehouseViewModel
+
+@{
+    ViewData["Title"] = "Warehouse Details";
+    var inventoryItems = ViewBag.InventoryItems as List<InventoryManagement.WebApp.Models.Inventory.InventoryItemViewModel>;
+}
+
+<h1>Warehouse Details</h1>
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Warehouse Information</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Name:</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+
+            <dt class="col-sm-3">Location:</dt>
+            <dd class="col-sm-9">@Model.Location</dd>
+
+            <dt class="col-sm-3">Address:</dt>
+            <dd class="col-sm-9">@Model.Address</dd>
+
+            <dt class="col-sm-3">Contact Person:</dt>
+            <dd class="col-sm-9">@Model.ContactPerson</dd>
+
+            <dt class="col-sm-3">Contact Email:</dt>
+            <dd class="col-sm-9">@Model.ContactEmail</dd>
+
+            <dt class="col-sm-3">Contact Phone:</dt>
+            <dd class="col-sm-9">@Model.ContactPhone</dd>
+
+            <dt class="col-sm-3">Status:</dt>
+            <dd class="col-sm-9">
+                @if (Model.IsActive)
+                {
+                    <span class="badge bg-success">Active</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">Inactive</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Created At:</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("MM/dd/yyyy")</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Inventory Items in this Warehouse</h5>
+    </div>
+    <div class="card-body p-0">
+        @if (inventoryItems != null && inventoryItems.Any())
+        {
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Location</th>
+                        <th>Quantity</th>
+                        <th>Reorder Threshold</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in inventoryItems)
+                    {
+                        <tr class="@(item.IsLowStock ? "table-danger" : "")">
+                            <td>@item.ProductName</td>
+                            <td>@item.ProductSku</td>
+                            <td>@item.LocationCode</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.ReorderThreshold</td>
+                            <td>
+                                @if (item.IsLowStock)
+                                {
+                                    <span class="badge bg-danger">Low Stock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">In Stock</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-controller="Inventory" asp-action="Adjust" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Adjust</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="p-4 text-center">
+                <p class="mb-0">No inventory items found in this warehouse.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" class="btn btn-secondary">Back to Warehouses</a>
+</div>

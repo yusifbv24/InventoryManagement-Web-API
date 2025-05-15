@@ -1,0 +1,165 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container">
+    <h1 class="my-4">Inventory Management Dashboard</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Products</h5>
+                    <p class="card-text display-4">@ViewBag.ProductCount</p>
+                    <a asp-controller="Products" asp-action="Index" class="btn btn-light">View Products</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Inventory Items</h5>
+                    <p class="card-text display-4">@ViewBag.InventoryCount</p>
+                    <a asp-controller="Inventory" asp-action="Index" class="btn btn-light">View Inventory</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5 class="card-title">Warehouses</h5>
+                    <p class="card-text display-4">@ViewBag.WarehouseCount</p>
+                    <a asp-controller="Warehouses" asp-action="Index" class="btn btn-dark">View Warehouses</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Orders</h5>
+                    <p class="card-text display-4">@ViewBag.OrderCount</p>
+                    <a asp-controller="Orders" asp-action="Index" class="btn btn-light">View Orders</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="m-0">Low Stock Items (@ViewBag.LowStockCount)</h5>
+                    <a asp-controller="Inventory" asp-action="LowStock" class="btn btn-sm btn-light">View All</a>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.LowStockItems != null && ViewBag.LowStockItems.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Warehouse</th>
+                                        <th>Quantity</th>
+                                        <th>Threshold</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in ViewBag.LowStockItems)
+                                    {
+                                        <tr>
+                                            <td>@item.ProductName</td>
+                                            <td>@item.WarehouseName</td>
+                                            <td>@item.Quantity</td>
+                                            <td>@item.ReorderThreshold</td>
+                                            <td>
+                                                <a asp-controller="Inventory" asp-action="Adjust" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Adjust</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-center mb-0">No low stock items.</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="m-0">Recent Orders</h5>
+                    <a asp-controller="Orders" asp-action="Index" class="btn btn-sm btn-light">View All</a>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.RecentOrders != null && ViewBag.RecentOrders.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in ViewBag.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td>@order.Id</td>
+                                            <td>@order.CustomerName</td>
+                                            <td>@order.OrderDate.ToString("MM/dd/yyyy")</td>
+                                            <td>@order.Status</td>
+                                            <td>@order.TotalAmount.ToString("C")</td>
+                                            <td>
+                                                <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-info">Details</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-center mb-0">No recent orders.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="m-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a asp-controller="Products" asp-action="Create" class="btn btn-primary btn-block w-100">Add New Product</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a asp-controller="Orders" asp-action="Create" class="btn btn-success btn-block w-100">Create New Order</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a asp-controller="Inventory" asp-action="LowStock" class="btn btn-warning btn-block w-100">View Low Stock</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="#" class="btn btn-info btn-block w-100">Generate Reports</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

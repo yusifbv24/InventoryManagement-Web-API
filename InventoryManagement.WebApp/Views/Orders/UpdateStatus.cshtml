@@ -1,0 +1,82 @@
+﻿@model InventoryManagement.WebApp.Models.Orders.UpdateOrderStatusViewModel
+
+@{
+    ViewData["Title"] = "Update Order Status";
+    var order = ViewBag.Order as InventoryManagement.WebApp.Models.Orders.OrderViewModel;
+}
+
+<h1>Update Order Status</h1>
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Order #@order?.Id Details</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Customer:</dt>
+            <dd class="col-sm-9">@order?.CustomerName</dd>
+
+            <dt class="col-sm-3">Order Date:</dt>
+            <dd class="col-sm-9">@order?.OrderDate.ToString("MM/dd/yyyy HH:mm")</dd>
+
+            <dt class="col-sm-3">Current Status:</dt>
+            <dd class="col-sm-9">
+                @if (order != null)
+                {
+                    var badgeClass = order.Status switch
+                    {
+                        "Created" => "bg-primary",
+                        "PendingInventory" => "bg-warning text-dark",
+                        "Reserved" => "bg-info",
+                        "Processing" => "bg-secondary",
+                        "Shipped" => "bg-primary",
+                        "Delivered" => "bg-success",
+                        "Cancelled" => "bg-danger",
+                        "Returned" => "bg-dark",
+                        _ => "bg-secondary"
+                    };
+                    <span class="badge @badgeClass">@order.Status</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Total Amount:</dt>
+            <dd class="col-sm-9">@order?.TotalAmount.ToString("C")</dd>
+
+            <dt class="col-sm-3">Items:</dt>
+            <dd class="col-sm-9">@order?.Items.Count</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="UpdateStatus">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="OrderId" />
+
+            <div class="form-group mb-3">
+                <label asp-for="NewStatus" class="control-label">New Status</label>
+                <select asp-for="NewStatus" class="form-control" asp-items="ViewBag.Statuses"></select>
+                <span asp-validation-for="NewStatus" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Notes" class="control-label">Status Change Notes (Optional)</label>
+                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+                <small class="form-text text-muted">Provide any additional information about this status change.</small>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Update Status" class="btn btn-primary" />
+                <a asp-action="Details" asp-route-id="@Model.OrderId" class="btn btn-secondary">Back to Order</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

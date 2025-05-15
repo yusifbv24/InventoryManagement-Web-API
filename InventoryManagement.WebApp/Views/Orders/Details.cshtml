@@ -1,0 +1,219 @@
+﻿@model InventoryManagement.WebApp.Models.Orders.OrderViewModel
+
+@{
+    ViewData["Title"] = "Order Details";
+    var orderHistory = ViewBag.OrderHistory as IEnumerable<InventoryManagement.WebApp.Models.Orders.OrderStatusHistoryViewModel>;
+}
+
+<h1>Order #@Model.Id Details</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Order Information</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Order Date:</dt>
+                    <dd class="col-sm-8">@Model.OrderDate.ToString("MM/dd/yyyy HH:mm")</dd>
+
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        @{
+                            var badgeClass = Model.Status switch
+                            {
+                                "Created" => "bg-primary",
+                                "PendingInventory" => "bg-warning text-dark",
+                                "Reserved" => "bg-info",
+                                "Processing" => "bg-secondary",
+                                "Shipped" => "bg-primary",
+                                "Delivered" => "bg-success",
+                                "Cancelled" => "bg-danger",
+                                "Returned" => "bg-dark",
+                                _ => "bg-secondary"
+                            };
+                        }
+                        <span class="badge @badgeClass">@Model.Status</span>
+                    </dd>
+
+                    @if (!string.IsNullOrEmpty(Model.TrackingNumber))
+                    {
+                        <dt class="col-sm-4">Tracking Number:</dt>
+                        <dd class="col-sm-8">@Model.TrackingNumber</dd>
+                    }
+
+                    @if (Model.ShippedDate.HasValue)
+                    {
+                        <dt class="col-sm-4">Shipped Date:</dt>
+                        <dd class="col-sm-8">@Model.ShippedDate.Value.ToString("MM/dd/yyyy")</dd>
+                    }
+
+                    @if (Model.DeliveredDate.HasValue)
+                    {
+                        <dt class="col-sm-4">Delivered Date:</dt>
+                        <dd class="col-sm-8">@Model.DeliveredDate.Value.ToString("MM/dd/yyyy")</dd>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <dt class="col-sm-4">Notes:</dt>
+                        <dd class="col-sm-8">@Model.Notes</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Customer Information</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Name:</dt>
+                    <dd class="col-sm-8">@Model.CustomerName</dd>
+
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">@Model.CustomerEmail</dd>
+
+                    <dt class="col-sm-4">Shipping Address:</dt>
+                    <dd class="col-sm-8">@Model.ShippingAddress</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Order Items</h5>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>@item.ProductName</td>
+                        <td>@item.ProductSKU</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.Price.ToString("C")</td>
+                        <td>@item.Total.ToString("C")</td>
+                        <td>
+                            @if (item.IsReserved)
+                            {
+                                <span class="badge bg-success">Reserved</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-end fw-bold">Total:</td>
+                    <td class="fw-bold">@Model.TotalAmount.ToString("C")</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+@if (orderHistory != null && orderHistory.Any())
+{
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Order History</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Previous Status</th>
+                        <th>New Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var history in orderHistory.OrderByDescending(h => h.ChangedAt))
+                    {
+                        <tr>
+                            <td>@history.ChangedAt.ToString("MM/dd/yyyy HH:mm")</td>
+                            <td>@history.PreviousStatus</td>
+                            <td>@history.NewStatus</td>
+                            <td>@(string.IsNullOrEmpty(history.Notes) ? "-" : history.Notes)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<div class="d-flex gap-2">
+    <a asp-action="Index" class="btn btn-secondary">Back to Orders</a>
+    <a asp-action="UpdateStatus" asp-route-id="@Model.Id" class="btn btn-warning">Update Status</a>
+
+    @if (Model.CanCancel)
+    {
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">
+            Cancel Order
+        </button>
+
+        <!-- Cancel Modal -->
+        <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cancelModalLabel">Cancel Order #@Model.Id</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form asp-action="Cancel" asp-route-id="@Model.Id" method="post">
+                        <div class="modal-body">
+                            <p>Are you sure you want to cancel this order?</p>
+                            <div class="mb-3">
+                                <label for="reason" class="form-label">Cancellation Reason (Optional)</label>
+                                <textarea class="form-control" id="reason" name="reason" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>

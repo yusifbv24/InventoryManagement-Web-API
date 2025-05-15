@@ -1,0 +1,32 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<h1 class="text-danger">Error</h1>
+<h2 class="text-danger">An error occurred while processing your request.</h2>
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        <strong>Request ID:</strong> <code>@Model.RequestId</code>
+    </p>
+}
+
+<div class="alert alert-warning">
+    <h4>What happened?</h4>
+    <p>Something went wrong with your request. This could be due to:</p>
+    <ul>
+        <li>A temporary issue with our servers</li>
+        <li>One of our microservices being unavailable</li>
+        <li>An error in the application</li>
+    </ul>
+
+    <h4>What can you do?</h4>
+    <p>Here are some steps you can try:</p>
+    <ul>
+        <li>Refresh the page and try again</li>
+        <li>Go back to the <a asp-controller="Home" asp-action="Index">dashboard</a> and start over</li>
+        <li>If the problem persists, please contact the administrator</li>
+    </ul>
+</div>

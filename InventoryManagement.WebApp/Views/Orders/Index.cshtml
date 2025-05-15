@@ -1,0 +1,103 @@
+﻿@model IEnumerable<InventoryManagement.WebApp.Models.Orders.OrderViewModel>
+
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<h1>Orders</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Order</a>
+</p>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Order Date</th>
+            <th>Status</th>
+            <th>Items</th>
+            <th>Total Amount</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.CustomerName</td>
+                <td>@item.OrderDate.ToString("MM/dd/yyyy")</td>
+                <td>
+                    @{
+                        var badgeClass = item.Status switch
+                        {
+                            "Created" => "bg-primary",
+                            "PendingInventory" => "bg-warning text-dark",
+                            "Reserved" => "bg-info",
+                            "Processing" => "bg-secondary",
+                            "Shipped" => "bg-primary",
+                            "Delivered" => "bg-success",
+                            "Cancelled" => "bg-danger",
+                            "Returned" => "bg-dark",
+                            _ => "bg-secondary"
+                        };
+                    }
+                    <span class="badge @badgeClass">@item.Status</span>
+                </td>
+                <td>@item.Items.Count</td>
+                <td>@item.TotalAmount.ToString("C")</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Details</a>
+                    <a asp-action="UpdateStatus" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Update Status</a>
+                    @if (item.CanCancel)
+                    {
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal@(item.Id)">
+                            Cancel
+                        </button>
+
+                        <!-- Cancel Modal -->
+                        <div class="modal fade" id="cancelModal@(item.Id)" tabindex="-1" aria-labelledby="cancelModalLabel@(item.Id)" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="cancelModalLabel@(item.Id)">Cancel Order #@item.Id</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form asp-action="Cancel" asp-route-id="@item.Id" method="post">
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to cancel this order?</p>
+                                            <div class="mb-3">
+                                                <label for="reason@(item.Id)" class="form-label">Cancellation Reason (Optional)</label>
+                                                <textarea class="form-control" id="reason@(item.Id)" name="reason" rows="3"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
